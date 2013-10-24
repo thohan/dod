@@ -3,7 +3,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Index</h2>
+<h2 style="text-align:center;">banner, replace with images and such</h2>
 <div class="game-canvas">
     <canvas id="myCanvas" width="760" height="560">
         This browser does not support HTML5
@@ -13,7 +13,7 @@
 {
     <script>
         // Get a reference to the element.
-        var canvas = $('#myCanvas')[0];
+        var canvas = document.getElementById('myCanvas');
 
         // Always check for properties and methods, to make sure your code doesn't break in other browsers.
         if (canvas && canvas.getContext) {
@@ -22,34 +22,26 @@
             if (ctx) {
                 // THIS places some squares representing game tiles, 50 x 50.
                 // LESSON Learned: You need to use beginPath to set the context or you'll keep drawing over yourself, not good!
-                //DrawWhiteTile(ctx, 0, 0);
-                var max = 500;
-                var inc = 50;
+                var max = 440;
+                var inc = 40;
                 var i;
                 var j;
 
                 for (i = 0; i < max; i += inc) {
-                    // add tiles to a row
                     for (j = 0; j < max; j += inc) {
-                        if (i % (2 * inc) === inc) {
+                        if ((i + j) % (2 * inc) === inc) {
                             DrawLightTile(ctx, i, j);
-                            j += inc;
-                            DrawDarkTile(ctx, i, j);
                         } else {
                             DrawDarkTile(ctx, i, j);
-                            j += inc;
-                            DrawLightTile(ctx, i, j);
                         }
                     }
                 }
-
-                ctx.closePath();
             }
         }
 
         // TODO: Replace these simple filled tiles with stylized, nifty-looking tiles.
         function DrawLightTile(ctx, x, y) {
-            var tileSize = 50;
+            var tileSize = 40;
             ctx.beginPath();
             ctx.fillStyle = '#eee';
             ctx.moveTo(x, y);
@@ -61,7 +53,7 @@
         }
 
         function DrawDarkTile(ctx, x, y) {
-            var tileSize = 50;
+            var tileSize = 40;
             ctx.beginPath();
             ctx.fillStyle = '#666';
             ctx.moveTo(x, y);

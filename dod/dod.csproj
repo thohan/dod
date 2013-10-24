@@ -130,10 +130,15 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Content Include="Content\Images\tempBackground.png" />
+    <Content Include="Content\Images\tempTitle.png" />
     <Content Include="Content\style.css" />
     <Content Include="Global.asax" />
+    <Content Include="Scripts\common.js" />
     <Content Include="Scripts\dod.js" />
+    <Content Include="Scripts\html5preloader.js" />
     <Content Include="Scripts\modernizr.custom.js" />
+    <Content Include="Scripts\raphael.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
