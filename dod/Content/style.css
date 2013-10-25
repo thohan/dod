@@ -1,10 +1,10 @@
 ﻿body {
-    background-image:url(/content/images/tempBackground.png);
+	background-image: url(/content/images/tempBackground.png);
 }
 
 .game-canvas {
-    margin: 0px auto 0px auto;
-    width: 760px;
-    border: 1px solid #000000;
-    background-color: #CCCCCC;
+	margin: 0px auto 0px auto;
+	width: 760px;
+	border: 1px solid #000000;
+	background-color: #CCCCCC;
 }
