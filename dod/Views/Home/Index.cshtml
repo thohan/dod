@@ -19,42 +19,29 @@
 			// Get the 2d context. Remember: you can only initialize one context per element.
 			var ctx = canvas.getContext('2d');
 			if (ctx) {
-				// THIS places some squares representing game tiles, 50 x 50.
-				// LESSON Learned: You need to use beginPath to set the context or you'll keep drawing over yourself, not good!
-				var max = 440;
-				var inc = 40;
-				var i;
-				var j;
+				//	var max = 440;
+				//	var inc = 40;
+				//	var i;
+				//	var j;
 
-				for (i = 0; i < max; i += inc) {
-					for (j = 0; j < max; j += inc) {
-						if ((i + j) % (2 * inc) === inc) {
-							DrawLightTile(ctx, i, j);
-						} else {
-							DrawDarkTile(ctx, i, j);
-						}
-					}
-				}
+				//	for (i = 0; i < max; i += inc) {
+				//		for (j = 0; j < max; j += inc) {
+				//			if ((i + j) % (2 * inc) === inc) {
+				//				DrawLightTile(ctx, i, j);
+				//			} else {
+				//				DrawDarkTile(ctx, i, j);
+				//			}
+				//		}
+				//	}
+				//}
 			}
 		}
 
 		// TODO: Replace these simple filled tiles with stylized, nifty-looking tiles.
-		function DrawLightTile(ctx, x, y) {
+		function DrawTile(ctx, x, y, color) {
 			var tileSize = 40;
 			ctx.beginPath();
-			ctx.fillStyle = '#eee';
-			ctx.moveTo(x, y);
-			ctx.lineTo(x + tileSize, y);
-			ctx.lineTo(x + tileSize, y + tileSize);
-			ctx.lineTo(x, y + tileSize);
-			ctx.closePath();
-			ctx.fill();
-		}
-
-		function DrawDarkTile(ctx, x, y) {
-			var tileSize = 40;
-			ctx.beginPath();
-			ctx.fillStyle = '#666';
+			ctx.fillStyle = color;
 			ctx.moveTo(x, y);
 			ctx.lineTo(x + tileSize, y);
 			ctx.lineTo(x + tileSize, y + tileSize);
