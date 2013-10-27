@@ -20,6 +20,9 @@
 
 		function preloadAssets(preloader) {
 			preloader.addFiles("titleScreen*:../Content/Images/tempTitle.png");
+			preloader.addFiles("tileSprites*:../Content/Images/tileSprites.png");
+			preloader.addFiles("buttonSprites*:../Content/Images/buttonSprites.png");
+
 		}
 
 		function drawTitleScreen() {
@@ -27,25 +30,23 @@
 				var ctx = self.canvas.getContext('2d');
 				if (ctx) {
 					var img = self.preloader.getFile("titleScreen");
-					//img.src = self.preloader.getFile("titleScreen");
 					ctx.drawImage(img, 0.5, 0.5);
-
-					drawTitleButtons(ctx);
+					prepareTitleButtons(ctx);
 				}
 			}
 		}
 
-		function drawTitleButtons(ctx) {
-			var offsetWidth = 50;
-			var offsetHeight = 15;
+		function prepareTitleButtons(ctx) {
+			var buttonWidth = 150;
+			var buttonHeight = 40;
+			var img = self.preloader.getFile("buttonSprites");
 			ctx.save();
-			ctx.translate(self.canvas.width / 2 - offsetWidth, self.canvas.height / 2 - offsetHeight);
-			ctx.moveTo(0, 0);
-			ctx.lineTo(100, 0);
-			ctx.lineTo(100, 30);
-			ctx.lineTo(0, 30);
-			ctx.lineTo(0, 0);
-			ctx.stroke();
+			ctx.translate((self.canvas.width - buttonWidth) / 2, (self.canvas.height - buttonHeight - 60) / 2);
+			ctx.drawImage(img, 0, 0, buttonWidth - 1, buttonHeight - 1, 0, 0, buttonWidth - 1, buttonHeight - 1);
+			ctx.restore();
+			ctx.save();
+			ctx.translate((self.canvas.width - buttonWidth) / 2, (self.canvas.height - buttonHeight + 60) / 2);
+			ctx.drawImage(img, 0, buttonHeight - 1, buttonWidth - 1, buttonHeight - 1, 0, 0, buttonWidth - 1, buttonHeight - 1);
 			ctx.restore();
 		}
 
