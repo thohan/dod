@@ -3,7 +3,11 @@
 	namespace("leaf").model = function () {
 		var self = this;
 
-		self.canvas = document.getElementById('myCanvas');
+		self.stage = new Kinetic.Stage({
+			container: "kContainer",
+			width: 760,
+			height: 560
+		});
 
 		self.preloader = html5preloader();
 		// note: what is this first screen called, before the title screen?
@@ -13,41 +17,139 @@
 
 			self.preloader.on("finish", function () {
 				// Now it's ok to start playing and whatnot.
-				drawTitleScreen();
+				var bgLayer = new Kinetic.Layer();
+				drawImageToStage(0, 0, "titleScreen", 760, 560, bgLayer);
+				var buttonLayer = new Kinetic.Layer();
+				var startButton = drawImageToStage(self.stage.getWidth() / 2 - 75, self.stage.getHeight() / 2 - 40, "buttonSprites", 150, 40, buttonLayer, 0, 0, 150, 40);
+				var continueButton = drawImageToStage(self.stage.getWidth() / 2 - 75, self.stage.getHeight() / 2 + 40, "buttonSprites", 150, 40, buttonLayer, 0, 40, 150, 40);
+				setStartButtonBehavior(startButton);
+				setContinueButtonBehavior(continueButton);
 			});
-
 		};
 
 		function preloadAssets(preloader) {
 			preloader.addFiles("titleScreen*:../Content/Images/tempTitle.png");
 			preloader.addFiles("tileSprites*:../Content/Images/tileSprites.png");
 			preloader.addFiles("buttonSprites*:../Content/Images/buttonSprites.png");
-
 		}
 
-		function drawTitleScreen() {
-			if (self.canvas && self.canvas.getContext) {
-				var ctx = self.canvas.getContext('2d');
-				if (ctx) {
-					var img = self.preloader.getFile("titleScreen");
-					ctx.drawImage(img, 0.5, 0.5);
-					prepareTitleButtons(ctx);
-				}
+		function setStartButtonBehavior(button) {
+			button.on("mousedown", function () {
+				button.setCrop({
+					x: 2,
+					y: 2,
+					width: 146,
+					height: 36
+				});
+				button.draw();
+			});
+			button.on("mouseup", function () {
+				button.setCrop({
+					x: 0,
+					y: 0,
+					width: 150,
+					height: 40
+				});
+				button.draw();
+				// TODO: display intro and go from there
+			});
+		}
+
+		function setContinueButtonBehavior(button) {
+			button.on("mousedown", function () {
+				button.setCrop({
+					x: 2,
+					y: 42,
+					width: 146,
+					height: 36
+				});
+				button.draw();
+			});
+			button.on("mouseup", function () {
+				button.setCrop({
+					x: 0,
+					y: 40,
+					width: 150,
+					height: 40
+				});
+				button.draw();
+				drawTransitionOne();
+				// TODO: Select from saved games
+			});
+		}
+
+		/// <summary>
+		/// Draws an image to the specified stage, in the specified location.
+		/// Optionally, cropping coordinates may be added.
+		/// </summary>
+		function drawImageToStage(x, y, image, width, height, layer, cropX, cropY, cropWidth, cropHeight) {
+			var img = self.preloader.getFile(image);
+			var imageObj = new Kinetic.Image({
+				x: x,
+				y: y,
+				image: img,
+				width: width,
+				height: height
+			});
+
+			if (cropX !== undefined && cropY !== undefined && cropWidth !== undefined && cropHeight !== undefined) {
+				imageObj.setCrop({
+					x: cropX,
+					y: cropY,
+					width: cropWidth,
+					height: cropHeight
+				});
 			}
+
+			// Consider some way to manage layers centrally, otherwise you're going to have layers running willy-nilly.
+			layer.add(imageObj);
+			self.stage.add(layer);
+			return imageObj;
 		}
 
-		function prepareTitleButtons(ctx) {
-			var buttonWidth = 150;
-			var buttonHeight = 40;
-			var img = self.preloader.getFile("buttonSprites");
-			ctx.save();
-			ctx.translate((self.canvas.width - buttonWidth) / 2, (self.canvas.height - buttonHeight - 60) / 2);
-			ctx.drawImage(img, 0, 0, buttonWidth - 1, buttonHeight - 1, 0, 0, buttonWidth - 1, buttonHeight - 1);
-			ctx.restore();
-			ctx.save();
-			ctx.translate((self.canvas.width - buttonWidth) / 2, (self.canvas.height - buttonHeight + 60) / 2);
-			ctx.drawImage(img, 0, buttonHeight - 1, buttonWidth - 1, buttonHeight - 1, 0, 0, buttonWidth - 1, buttonHeight - 1);
-			ctx.restore();
+		function drawTransitionOne() {
+			var strokeWidth = 12;
+			var currentStroke = 0;
+			var canvasWidthCenter = self.stage.getWidth()/2;
+			var canvasHeightCenter = self.stage.getHeight()/2;
+			var counter = 0;
+			var goUp = true;
+			var layerArray = [];
+
+			setInterval(function () {
+				if (goUp === true) {
+					var layer = new Kinetic.Layer();
+					layerArray[counter] = layer;
+					var color = counter % 2 === 1 ? 'black' : 'green';
+					var rectangle = new Kinetic.Rect({
+						x: canvasWidthCenter - currentStroke - 60,
+						y: canvasHeightCenter - currentStroke,
+						width: currentStroke * 2 + 120,
+						height: currentStroke * 2,
+						stroke: color,
+						strokeWidth: strokeWidth
+					});
+
+					layer.add(rectangle);
+					self.stage.add(layer);
+					currentStroke += strokeWidth;
+					counter++;
+					if (counter > 30) {
+						goUp = false;
+					}
+				} else {
+					// remove the upper-most layer
+					if (layerArray[counter - 1]) {
+						layerArray[counter - 1].remove();
+					}
+
+					counter--;
+
+					if (counter === 0) {
+						clearInterval();
+					}
+				}
+			}, 50);
 		}
 
 		return self;

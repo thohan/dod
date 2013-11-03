@@ -8,10 +8,10 @@ namespace dod.App_Start
 		{
 			bundles.Add(new ScriptBundle("~/bundles/js/main").Include(
 				"~/Scripts/modernizr.custom.js",
-                "~/Scripts/raphael.js",
-                "~/Scripts/common.js",
-                "~/Scripts/dod.js",
-                "~/Scripts/html5preloader.js"
+				//"~/Scripts/raphael.js",
+				"~/Scripts/common.js",
+				"~/Scripts/dod.js",
+				"~/Scripts/html5preloader.js"
 			));
 
 			bundles.Add(new StyleBundle("~/Content/css").Include(

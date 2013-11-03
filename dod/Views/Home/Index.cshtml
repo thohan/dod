@@ -5,49 +5,11 @@
 
 <h2 style="text-align: center;">banner, replace with images and such</h2>
 <div class="game-canvas">
-	<canvas id="myCanvas" width="760" height="560">This browser does not support HTML5
-	</canvas>
+	<div id="kContainer"></div>
+@*	<canvas id="myCanvas" width="760" height="560">This browser does not support HTML5
+	</canvas>*@
 </div>
 @section scripts
 {
-	<script>
-		// Get a reference to the element.
-		var canvas = document.getElementById('myCanvas');
 
-		// Always check for properties and methods, to make sure your code doesn't break in other browsers.
-		if (canvas && canvas.getContext) {
-			// Get the 2d context. Remember: you can only initialize one context per element.
-			var ctx = canvas.getContext('2d');
-			if (ctx) {
-				//	var max = 440;
-				//	var inc = 40;
-				//	var i;
-				//	var j;
-
-				//	for (i = 0; i < max; i += inc) {
-				//		for (j = 0; j < max; j += inc) {
-				//			if ((i + j) % (2 * inc) === inc) {
-				//				DrawLightTile(ctx, i, j);
-				//			} else {
-				//				DrawDarkTile(ctx, i, j);
-				//			}
-				//		}
-				//	}
-				//}
-			}
-		}
-
-		// TODO: Replace these simple filled tiles with stylized, nifty-looking tiles.
-		function DrawTile(ctx, x, y, color) {
-			var tileSize = 40;
-			ctx.beginPath();
-			ctx.fillStyle = color;
-			ctx.moveTo(x, y);
-			ctx.lineTo(x + tileSize, y);
-			ctx.lineTo(x + tileSize, y + tileSize);
-			ctx.lineTo(x, y + tileSize);
-			ctx.closePath();
-			ctx.fill();
-		}
-	</script>
 }
