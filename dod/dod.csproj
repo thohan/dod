@@ -130,6 +130,8 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Content Include="Content\Images\buttonSprites.png" />
+    <Content Include="Content\Images\startingCrawl.png" />
     <Content Include="Content\Images\tempBackground.png" />
     <Content Include="Content\Images\tempTitle.png" />
     <Content Include="Content\Images\tileSprites.png" />

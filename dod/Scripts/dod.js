@@ -28,9 +28,10 @@
 		};
 
 		function preloadAssets(preloader) {
+			preloader.addFiles("buttonSprites*:../Content/Images/buttonSprites.png");
+			preloader.addFiles("startingCrawl*:../Content/Images/startingCrawl.png");
 			preloader.addFiles("titleScreen*:../Content/Images/tempTitle.png");
 			preloader.addFiles("tileSprites*:../Content/Images/tileSprites.png");
-			preloader.addFiles("buttonSprites*:../Content/Images/buttonSprites.png");
 		}
 
 		function setStartButtonBehavior(button) {
@@ -51,6 +52,7 @@
 					height: 40
 				});
 				button.draw();
+				drawTransitionOne();
 				// TODO: display intro and go from there
 			});
 		}
@@ -108,18 +110,26 @@
 		}
 
 		function drawTransitionOne() {
-			var strokeWidth = 12;
+			var strokeWidth = 20;
 			var currentStroke = 0;
 			var canvasWidthCenter = self.stage.getWidth()/2;
 			var canvasHeightCenter = self.stage.getHeight()/2;
 			var counter = 0;
 			var goUp = true;
-			var layerArray = [];
+			var rectArray = [];
+			
+			// #383870
+			var backRect = new Kinetic.Rect({
+				width: 760/2,
+				height: 560/2,
+				fill: "#383870"
+			});
 
-			setInterval(function () {
+			var layer = new Kinetic.Layer();
+			self.stage.add(layer);
+
+			var interval = setInterval(function () {
 				if (goUp === true) {
-					var layer = new Kinetic.Layer();
-					layerArray[counter] = layer;
 					var color = counter % 2 === 1 ? 'black' : 'green';
 					var rectangle = new Kinetic.Rect({
 						x: canvasWidthCenter - currentStroke - 60,
@@ -130,26 +140,39 @@
 						strokeWidth: strokeWidth
 					});
 
+					rectArray[counter] = rectangle;
 					layer.add(rectangle);
-					self.stage.add(layer);
+					rectangle.setZIndex(20 + counter);
+					//self.stage.add(layer);
+					layer.draw();
+
 					currentStroke += strokeWidth;
 					counter++;
-					if (counter > 30) {
+					
+					if (counter > 18) {
 						goUp = false;
+						layer.add(backRect);
+						backRect.setZIndex(18);
+						//backLayer.draw();
 					}
 				} else {
-					// remove the upper-most layer
-					if (layerArray[counter - 1]) {
-						layerArray[counter - 1].remove();
+					// remove the upper-most rect in rectArray
+					if (rectArray[counter - 1]) {
+						rectArray[counter - 1].destroy();
+						layer.draw();
 					}
 
 					counter--;
 
 					if (counter === 0) {
-						clearInterval();
+						clearInterval(interval);
 					}
 				}
 			}, 50);
+		}
+
+		function drawStartCrawl() {
+			
 		}
 
 		return self;
