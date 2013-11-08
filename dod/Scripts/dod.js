@@ -120,12 +120,15 @@
 			
 			// #383870
 			var backRect = new Kinetic.Rect({
-				width: 760/2,
-				height: 560/2,
-				fill: "#383870"
+				width: 760,
+				height: 560,
+				fill: "#383870",
+				visible: false
 			});
 
 			var layer = new Kinetic.Layer();
+			layer.add(backRect);
+			// backRect.setZIndex(18);
 			self.stage.add(layer);
 
 			var interval = setInterval(function () {
@@ -151,8 +154,7 @@
 					
 					if (counter > 18) {
 						goUp = false;
-						layer.add(backRect);
-						backRect.setZIndex(18);
+						backRect.setVisible(true);
 						//backLayer.draw();
 					}
 				} else {
