@@ -38,29 +38,6 @@
 			button.on("mousedown", function () {
 				button.setCrop({
 					x: 2,
-					y: 2,
-					width: 146,
-					height: 36
-				});
-				button.draw();
-			});
-			button.on("mouseup", function () {
-				button.setCrop({
-					x: 0,
-					y: 0,
-					width: 150,
-					height: 40
-				});
-				button.draw();
-				drawTransitionOne();
-				// TODO: display intro and go from there
-			});
-		}
-
-		function setContinueButtonBehavior(button) {
-			button.on("mousedown", function () {
-				button.setCrop({
-					x: 2,
 					y: 42,
 					width: 146,
 					height: 36
@@ -71,6 +48,46 @@
 				button.setCrop({
 					x: 0,
 					y: 40,
+					width: 150,
+					height: 40
+				});
+				button.draw();
+
+				var backRect = new Kinetic.Rect({
+					width: 760,
+					height: 560,
+					fill: "#383870",
+					visible: false
+				});
+
+				var layer = new Kinetic.Layer();
+				layer.add(backRect);
+				var crawlImage = drawImageToStage(0, 560, "startingCrawl", 760, 900, layer);
+				self.stage.add(layer);
+
+				drawTransitionOne(function () {
+					backRect.setVisible(true);
+					layer.draw();
+				}, function () {
+					drawStartCrawl(crawlImage, layer);
+				});
+			});
+		}
+
+		function setContinueButtonBehavior(button) {
+			button.on("mousedown", function () {
+				button.setCrop({
+					x: 2,
+					y: 2,
+					width: 146,
+					height: 36
+				});
+				button.draw();
+			});
+			button.on("mouseup", function () {
+				button.setCrop({
+					x: 0,
+					y: 0,
 					width: 150,
 					height: 40
 				});
@@ -109,7 +126,7 @@
 			return imageObj;
 		}
 
-		function drawTransitionOne() {
+		function drawTransitionOne(callback, callback2) {
 			var strokeWidth = 20;
 			var currentStroke = 0;
 			var canvasWidthCenter = self.stage.getWidth()/2;
@@ -117,48 +134,33 @@
 			var counter = 0;
 			var goUp = true;
 			var rectArray = [];
-			
-			// #383870
-			var backRect = new Kinetic.Rect({
-				width: 760,
-				height: 560,
-				fill: "#383870",
-				visible: false
-			});
-
 			var layer = new Kinetic.Layer();
-			layer.add(backRect);
-			// backRect.setZIndex(18);
 			self.stage.add(layer);
 
 			var interval = setInterval(function () {
 				if (goUp === true) {
 					var color = counter % 2 === 1 ? 'black' : 'green';
 					var rectangle = new Kinetic.Rect({
-						x: canvasWidthCenter - currentStroke - 60,
-						y: canvasHeightCenter - currentStroke,
-						width: currentStroke * 2 + 120,
-						height: currentStroke * 2,
+						x: canvasWidthCenter - (currentStroke + 60 + strokeWidth/4),
+						y: canvasHeightCenter - (currentStroke + strokeWidth/4),
+						width: currentStroke * 2 + 120 + strokeWidth/4,
+						height: currentStroke * 2 + strokeWidth/4,
 						stroke: color,
 						strokeWidth: strokeWidth
 					});
 
 					rectArray[counter] = rectangle;
 					layer.add(rectangle);
-					rectangle.setZIndex(20 + counter);
-					//self.stage.add(layer);
 					layer.draw();
 
 					currentStroke += strokeWidth;
 					counter++;
 					
-					if (counter > 18) {
+					if (counter > 20) {
 						goUp = false;
-						backRect.setVisible(true);
-						//backLayer.draw();
+						callback();	// This is where you can do whatever you need to under the fully-expanded transition animation.
 					}
 				} else {
-					// remove the upper-most rect in rectArray
 					if (rectArray[counter - 1]) {
 						rectArray[counter - 1].destroy();
 						layer.draw();
@@ -168,13 +170,23 @@
 
 					if (counter === 0) {
 						clearInterval(interval);
+						callback2();
 					}
 				}
-			}, 50);
+			}, 75);
 		}
 
-		function drawStartCrawl() {
+		function drawStartCrawl(crawlImage, layer) {
+			var interval = setInterval(function () {
+				crawlImage.setY(crawlImage.getY() - 1);
+				layer.draw();
+				
+				if (crawlImage.getY() < -560) {
+					clearInterval(interval);
+				}
+			}, 20);
 			
+			// TODO: Add skip/continue buttons and their behaviors
 		}
 
 		return self;
