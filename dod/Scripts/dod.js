@@ -38,7 +38,7 @@
 			button.on("mousedown", function () {
 				button.setCrop({
 					x: 2,
-					y: 42,
+					y: 2,
 					width: 146,
 					height: 36
 				});
@@ -47,7 +47,7 @@
 			button.on("mouseup", function () {
 				button.setCrop({
 					x: 0,
-					y: 40,
+					y: 0,
 					width: 150,
 					height: 40
 				});
@@ -78,7 +78,7 @@
 			button.on("mousedown", function () {
 				button.setCrop({
 					x: 2,
-					y: 2,
+					y: 42,
 					width: 146,
 					height: 36
 				});
@@ -87,7 +87,7 @@
 			button.on("mouseup", function () {
 				button.setCrop({
 					x: 0,
-					y: 0,
+					y: 40,
 					width: 150,
 					height: 40
 				});
