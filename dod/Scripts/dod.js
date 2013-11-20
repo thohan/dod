@@ -20,16 +20,32 @@
 
 			self.preloader.on("finish", function () {
 				// Now it's ok to start playing and whatnot.
-				var bgLayer = new Kinetic.Layer();
-				self.stage.add(bgLayer);
-				drawImageToStage(0, 0, "titleScreen", 760, 560, bgLayer);
-				var buttonLayer = new Kinetic.Layer();
-				self.stage.add(buttonLayer);
-				var startButton = drawImageToStage(self.stage.getWidth() / 2 - 75, self.stage.getHeight() / 2 - 40, "buttonSprites", 150, 40, buttonLayer, 0, 0, 150, 40);
-				var continueButton = drawImageToStage(self.stage.getWidth() / 2 - 75, self.stage.getHeight() / 2 + 40, "buttonSprites", 150, 40, buttonLayer, 0, 40, 150, 40);
-				setStartButtonBehavior(startButton);
-				setContinueButtonBehavior(continueButton);
+				setUpStartScreen();
 			});
+		};
+
+		self.profileNamesKey = "leaf.profiles";
+
+		self.profileNames = localStorage[self.profileNamesKey].split(",");
+
+		self.profile = new Profile();
+
+		self.saveProfile = new function(profileName) {
+			if (profileName != null) {
+				var val = localStorage[self.profileNamesKey];
+
+				// Ensure the name isn't already in localStorage, or it's overwrite city, which is bad.
+				if (val.indexOf(profileName) === -1) {
+					// Consider a limit of four or five
+					if (val.length === 0) {
+						val = self.Name.toLowerCase();
+					} else {
+						val += "," + self.Name.toLowerCase();
+					}
+					
+					localStorage[self.profileNamesKey] = val;
+				}
+			}
 		};
 
 		function preloadAssets(preloader) {
@@ -37,6 +53,18 @@
 			preloader.addFiles("startingCrawl*:../Content/Images/startingCrawl.png");
 			preloader.addFiles("titleScreen*:../Content/Images/tempTitle.png");
 			preloader.addFiles("tileSprites*:../Content/Images/tileSprites.png");
+		}
+
+		function setUpStartScreen() {
+			var bgLayer = new Kinetic.Layer();
+			self.stage.add(bgLayer);
+			drawImageToStage(0, 0, "titleScreen", 760, 560, bgLayer);
+			var buttonLayer = new Kinetic.Layer();
+			self.stage.add(buttonLayer);
+			var startButton = drawImageToStage(self.stage.getWidth() / 2 - 75, self.stage.getHeight() / 2 - 40, "buttonSprites", 150, 40, buttonLayer, 0, 0, 150, 40);
+			var continueButton = drawImageToStage(self.stage.getWidth() / 2 - 75, self.stage.getHeight() / 2 + 40, "buttonSprites", 150, 40, buttonLayer, 0, 40, 150, 40);
+			setStartButtonBehavior(startButton);
+			setContinueButtonBehavior(continueButton);
 		}
 
 		function setStartButtonBehavior(button) {
@@ -69,9 +97,11 @@
 
 				drawTransitionOne(function () {
 					backRect.setVisible(true);
+					// TODO: Something with a textbox/accept/cancel for creating a new profile.
 					layer.draw();
 				}, function () {
-					drawStartCrawl(layer, backRect);
+					// This won't happen until a profile is created
+					// drawStartCrawl(layer, backRect);
 				});
 			});
 		}
@@ -95,9 +125,12 @@
 				});
 				button.draw();
 				drawTransitionTwo(function () {
-					// Mid-transition code here
+					for (var i = 0; i < self.profileNames.length; i++) {
+						// TODO: Use self.profileNames[i] to make buttons for profile choosing. Also, ensure there is no leading comma (this'll be done elsewhere);
+					}
+				}, function() {
+					// End-transition code here
 				});
-				// TODO: Select from saved games
 			});
 		}
 
@@ -152,7 +185,6 @@
 				});
 			}
 
-			// Consider some way to manage layers centrally, otherwise you're going to have layers running willy-nilly.
 			layer.add(imageObj);
 			setTimeout(function () {
 				imageObj.destroy();
@@ -255,6 +287,7 @@
 
 					if (counter <= 0) {
 						clearInterval(interval);
+						callback2();
 					}
 				}
 			}, 60);
@@ -293,6 +326,17 @@
 
 		return self;
 	};
+
+	// This is where various objects are set up
+	function Profile(name) {
+		var self = this;
+		self.Name = name;
+		// some example items that may or may not get used
+		self.Money = 0;
+		self.Strength = 0;
+		self.Intelligence = 0;
+		self.Pet = "";
+	}
 
 	$("document").ready(function () {
 		var model = namespace("leaf").model();
