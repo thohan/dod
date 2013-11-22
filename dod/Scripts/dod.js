@@ -9,9 +9,9 @@
 			height: 560
 		});
 
-		self.tileSize = 40;
+		self.tileSize = tileSize;
 
-		self.preloader = html5preloader();
+		self.preloader = preloader;
 
 		// note: what is this first screen called, before the title screen?
 		self.initialize = function () {
@@ -24,32 +24,20 @@
 			});
 		};
 
-		self.profileNamesKey = "leaf.profiles";
-
-		self.profileNames = localStorage[self.profileNamesKey].split(",");
+		self.transitions = new Transitions();
 
 		self.profile = new Profile();
 
-		self.saveProfile = new function(profileName) {
-			if (profileName != null) {
-				var val = localStorage[self.profileNamesKey];
+		self.profileHelper = new ProfileHelper();
 
-				// Ensure the name isn't already in localStorage, or it's overwrite city, which is bad.
-				if (val.indexOf(profileName) === -1) {
-					// Consider a limit of four or five
-					if (val.length === 0) {
-						val = self.Name.toLowerCase();
-					} else {
-						val += "," + self.Name.toLowerCase();
-					}
-					
-					localStorage[self.profileNamesKey] = val;
-				}
-			}
-		};
+		// for testing:
+		//var x = self.profileHelper.profileNames();
+		//self.profileHelper.save("testuser", self.profile);
 
-		function preloadAssets(preloader) {
-			preloader.addFiles("buttonSprites*:../Content/Images/buttonSprites.png");
+		self.helper = new DrawHelper();
+
+		function preloadAssets() {
+			self.preloader.addFiles("buttonSprites*:../Content/Images/buttonSprites.png");
 			preloader.addFiles("startingCrawl*:../Content/Images/startingCrawl.png");
 			preloader.addFiles("titleScreen*:../Content/Images/tempTitle.png");
 			preloader.addFiles("tileSprites*:../Content/Images/tileSprites.png");
@@ -58,13 +46,26 @@
 		function setUpStartScreen() {
 			var bgLayer = new Kinetic.Layer();
 			self.stage.add(bgLayer);
-			drawImageToStage(0, 0, "titleScreen", 760, 560, bgLayer);
+			self.helper.drawImage(0, 0, "titleScreen", 760, 560, bgLayer);
 			var buttonLayer = new Kinetic.Layer();
 			self.stage.add(buttonLayer);
-			var startButton = drawImageToStage(self.stage.getWidth() / 2 - 75, self.stage.getHeight() / 2 - 40, "buttonSprites", 150, 40, buttonLayer, 0, 0, 150, 40);
-			var continueButton = drawImageToStage(self.stage.getWidth() / 2 - 75, self.stage.getHeight() / 2 + 40, "buttonSprites", 150, 40, buttonLayer, 0, 40, 150, 40);
+			var startButton = self.helper.drawImage(self.stage.getWidth() / 2 - 75, self.stage.getHeight() / 2 - 40, "buttonSprites", 150, 40, buttonLayer, 0, 0, 150, 40);
+			var continueButton = self.helper.drawImage(self.stage.getWidth() / 2 - 75, self.stage.getHeight() / 2 + 40, "buttonSprites", 150, 40, buttonLayer, 0, 40, 150, 40);
 			setStartButtonBehavior(startButton);
 			setContinueButtonBehavior(continueButton);
+
+			// TODO: Comment out all of the following this, it's a "privacy screen" for testing purposes
+			var topRect = new Kinetic.Rect({
+				width: 760,
+				height: 560,
+				fill: "#aaa",
+				visible: true
+			});
+			var topLayer = new Kinetic.Layer();
+			topLayer.add(topRect);
+			self.stage.add(topLayer);
+			// Bonus: textbox on top of the canvas:
+			
 		}
 
 		function setStartButtonBehavior(button) {
@@ -95,13 +96,13 @@
 				layer.add(backRect);
 				self.stage.add(layer);
 
-				drawTransitionOne(function () {
+				self.transitions.zowie(function () {
 					backRect.setVisible(true);
 					// TODO: Something with a textbox/accept/cancel for creating a new profile.
 					layer.draw();
 				}, function () {
 					// This won't happen until a profile is created
-					// drawStartCrawl(layer, backRect);
+					drawStartCrawl(layer, backRect);
 				});
 			});
 		}
@@ -124,75 +125,62 @@
 					height: 40
 				});
 				button.draw();
-				drawTransitionTwo(function () {
+				self.transitions.tilesweep(function () {
 					for (var i = 0; i < self.profileNames.length; i++) {
 						// TODO: Use self.profileNames[i] to make buttons for profile choosing. Also, ensure there is no leading comma (this'll be done elsewhere);
 					}
-				}, function() {
+				}, function () {
 					// End-transition code here
 				});
 			});
 		}
 
-		/// <summary>
-		/// Draws an image to the specified layer, in the specified location.
-		/// Optionally, cropping coordinates may be added.
-		/// </summary>
-		function drawImageToStage(x, y, image, width, height, layer, cropX, cropY, cropWidth, cropHeight) {
-			var img = self.preloader.getFile(image);
-			var imageObj = new Kinetic.Image({
-				x: x,
-				y: y,
-				image: img,
-				width: width,
-				height: height
-			});
+		function drawStartCrawl(layer, backRect) {
+			var crawlImage = self.helper.drawImage(0, 560, "startingCrawl", 760, 900, layer);
+			var continueButton = self.helper.drawImage(620, 760, "buttonSprites", 150, 40, layer, 0, 40, 150, 40);
 
-			if (cropX !== undefined && cropY !== undefined && cropWidth !== undefined && cropHeight !== undefined) {
-				imageObj.setCrop({
-					x: cropX,
-					y: cropY,
-					width: cropWidth,
-					height: cropHeight
+			continueButton.on("mouseup", function () {
+				self.transitions.zowie(function () {
+					backRect.destroy();
+					continueButton.destroy();
+					crawlImage.destroy();
+					// TODO: Add the game board!
+					layer.draw();
+				}, function () {
+					// what?
 				});
-			}
+			});
+			
+			var interval = setInterval(function () {
+				crawlImage.setY(crawlImage.getY() - 1);
+				layer.draw();
 
-			// Consider some way to manage layers centrally, otherwise you're going to have layers running willy-nilly.
-			layer.add(imageObj);
-			layer.draw();
-			return imageObj;
+				if (continueButton.getY() > 480) {
+					continueButton.setY(continueButton.getY() - 1);
+				}
+
+				if (crawlImage.getY() < -560) {
+					clearInterval(interval);
+				}
+			}, 20);
+
+			// TODO: Add skip/continue buttons and their behaviors
 		}
 
-		/// <summary>
-		/// Same as drawImageToStage() but the timeout will destroy the item!
-		/// </summary>
-		function drawImageToStageTimed(x, y, image, width, height, layer, cropX, cropY, cropWidth, cropHeight, timeout) {
-			var img = self.preloader.getFile(image);
-			var imageObj = new Kinetic.Image({
-				x: x,
-				y: y,
-				image: img,
-				width: width,
-				height: height
-			});
+		return self;
+	};
 
-			if (cropX !== undefined && cropY !== undefined && cropWidth !== undefined && cropHeight !== undefined) {
-				imageObj.setCrop({
-					x: cropX,
-					y: cropY,
-					width: cropWidth,
-					height: cropHeight
-				});
-			}
+	// *** globals ***
+	var preloader = html5preloader();
+	var tileSize = 40;
 
-			layer.add(imageObj);
-			setTimeout(function () {
-				imageObj.destroy();
-			}, timeout);
-			return imageObj;
-		}
+	// *** various functions outside of the main model ***
+	function Transitions() {
+		var self = this;
 
-		function drawTransitionOne(callback, callback2) {
+		self.helper = new DrawHelper();
+
+		self.zowie = function (callback, callback2) {
 			var strokeWidth = 20;
 			var currentStroke = 0;
 			var canvasWidthCenter = self.stage.getWidth() / 2;
@@ -224,7 +212,7 @@
 
 					if (counter > 20) {
 						goUp = false;
-						callback();	// This is where you can do whatever you need to under the fully-expanded transition animation.
+						callback(); // This is where you can do whatever you need to under the fully-expanded transition animation.
 					}
 				} else {
 					if (rectArray[counter - 1]) {
@@ -236,14 +224,14 @@
 
 					if (counter === 0) {
 						clearInterval(interval);
-						callback2();	// This is where you do whatever at the end of the transition
+						callback2(); // This is where you do whatever at the end of the transition
 					}
 				}
 			}, 75);
-		}
+		};
 
-		function drawTransitionTwo(callback, callback2) {
-			var tsize = self.tileSize;
+		self.tilesweep = function (callback, callback2) {
+			var tsize = tileSize;
 			var layer = new Kinetic.Layer();
 			self.stage.add(layer);
 			var counter = 0;
@@ -251,25 +239,25 @@
 			var i;
 			var j;
 			var totalShapes = 0;
-			
+
 			var interval = setInterval(function () {
 				if (goUp === true) {
 					j = 0;
 					i = counter;
-					
+
 					while (i >= 0) {
 						if (i >= 0 && i < 19 && j >= 0 && j < 14) {
 							if (i >= 0) {
 								if ((i % 2 === 1 && j % 2 === 1) || (i % 2 === 0 && j % 2 === 0)) {
-									drawImageToStageTimed(i * tsize, j * tsize, "tileSprites", tsize, tsize, layer, 0, 0, tsize, tsize, 2000);
+									self.helper.drawImageTimed(i * tsize, j * tsize, "tileSprites", tsize, tsize, layer, 0, 0, tsize, tsize, 2000);
 								} else {
-									drawImageToStageTimed(i * tsize, j * tsize, "tileSprites", tsize, tsize, layer, tsize * 1, 0, tsize, tsize, 2000);
+									self.helper.drawImageTimed(i * tsize, j * tsize, "tileSprites", tsize, tsize, layer, tsize * 1, 0, tsize, tsize, 2000);
 								}
-								
+
 								totalShapes++;
 							}
 						}
-						
+
 						j++;
 						i--;
 					}
@@ -291,51 +279,147 @@
 					}
 				}
 			}, 60);
-		}
-
-		function drawStartCrawl(layer, backRect) {
-			var crawlImage = drawImageToStage(0, 560, "startingCrawl", 760, 900, layer);
-			var continueButton = drawImageToStage(620, 760, "buttonSprites", 150, 40, layer, 0, 40, 150, 40);
-			continueButton.on("mouseup", function () {
-				drawTransitionOne(function () {
-					backRect.destroy();
-					continueButton.destroy();
-					crawlImage.destroy();
-					// TODO: Add the game board!
-					layer.draw();
-				}, function () {
-					// what?
-				});
-			});
-			var interval = setInterval(function () {
-				crawlImage.setY(crawlImage.getY() - 1);
-
-				layer.draw();
-
-				if (continueButton.getY() > 480) {
-					continueButton.setY(continueButton.getY() - 1);
-				}
-
-				if (crawlImage.getY() < -560) {
-					clearInterval(interval);
-				}
-			}, 20);
-
-			// TODO: Add skip/continue buttons and their behaviors
-		}
+		};
 
 		return self;
-	};
+	}
+
+	function Gameboard() {
+		var self = this;
+
+		// draw a board: A bunch of tiles. what kind of data structure would I use to serialize a gameboard?
+
+		return self;
+	}
 
 	// This is where various objects are set up
-	function Profile(name) {
+	function Profile() {
 		var self = this;
-		self.Name = name;
+
+		self.Name = "";
 		// some example items that may or may not get used
+		// I can't really go forward with this until I know what info needs to be stored. When known, move above this comment line.
 		self.Money = 0;
 		self.Strength = 0;
 		self.Intelligence = 0;
 		self.Pet = "";
+
+		return self;
+	}
+
+	function ProfileHelper() {
+		var self = this;
+		self.profileNamesKey = "leaf.profiles";
+
+		self.profileNames = function () {
+			if (localStorage[self.profileNamesKey]) {
+				return localStorage[self.profileNamesKey].split(",");
+			} else {
+				return "";
+			}
+		};
+
+		/// <summary>
+		/// This method saves the actual profile, a stringified object
+		/// </summary>
+		self.save = function (profileName, profile) {
+			if (profileName != null && profileName.length > 0) {
+				// I need to check against the list!
+				var profileList = localStorage[self.profileNamesKey];
+
+				if (typeof profileList == "undefined") {
+					profileList = "";
+				}
+
+				if (profileList.length === 0) {
+					profileList = profileName.toLowerCase();
+				} else {
+					var profileArray = profileList.split(",");
+					if (profileArray.length > 5) {
+						alert("all profiles are used");
+						return;
+					}
+					
+					if (profileList.indexOf(profileName) === -1) {
+						profileList += "," + profileName.toLowerCase();
+					}
+				}
+
+				localStorage[self.profileNamesKey] = profileList;
+				localStorage[self.profileNamesKey + "." + profileName] = JSON.stringify(profile);
+				// alert(localStorage[self.profileNamesKey + "." + profileName]);
+			} else {
+				alert("profileName is empty: ProfileHelper.save()");
+			}
+		};
+
+		return self;
+	}
+
+	function DrawHelper() {
+		var self = this;
+		self.preloader = preloader;
+
+		/// <summary>
+		/// Draws an image to the specified layer, in the specified location.
+		/// Optionally, cropping coordinates may be added.
+		/// </summary>
+		self.drawImage = function (x, y, image, width, height, layer, cropX, cropY, cropWidth, cropHeight) {
+			// This won't work. I think I'm going to have to pass in the actual image instead of a string. No problem, should work fine. Or, use a global preloader
+			var img = self.preloader.getFile(image);
+			var imageObj = new Kinetic.Image({
+				x: x,
+				y: y,
+				image: img,
+				width: width,
+				height: height
+			});
+
+			if (cropX !== undefined && cropY !== undefined && cropWidth !== undefined && cropHeight !== undefined) {
+				imageObj.setCrop({
+					x: cropX,
+					y: cropY,
+					width: cropWidth,
+					height: cropHeight
+				});
+			}
+
+			// Consider some way to manage layers centrally, otherwise you're going to have layers running willy-nilly.
+			layer.add(imageObj);
+			layer.draw();
+			return imageObj;
+		};
+
+		/// <summary>
+		/// Same as drawImage() but the timeout will destroy the item! Possibly move this to some kind of utility class function.
+		/// </summary>
+		self.drawImageTimed = function (x, y, image, width, height, layer, cropX, cropY, cropWidth, cropHeight, timeout) {
+			var img = self.preloader.getFile(image);
+			var imageObj = new Kinetic.Image({
+				x: x,
+				y: y,
+				image: img,
+				width: width,
+				height: height
+			});
+
+			if (cropX !== undefined && cropY !== undefined && cropWidth !== undefined && cropHeight !== undefined) {
+				imageObj.setCrop({
+					x: cropX,
+					y: cropY,
+					width: cropWidth,
+					height: cropHeight
+				});
+			}
+
+			layer.add(imageObj);
+			setTimeout(function () {
+				imageObj.destroy();
+			}, timeout);
+			return imageObj;
+		};
+
+		return self;
 	}
 
 	$("document").ready(function () {

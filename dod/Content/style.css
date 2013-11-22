@@ -1,5 +1,6 @@
 ﻿body {
-	background-image: url(/content/images/tempBackground.png);
+	xbackground-image: url(/content/images/tempBackground.png);
+	background-color: #ccc;
 }
 
 .game-canvas {
@@ -7,5 +8,5 @@
 	margin: 0px auto 0px auto;
 	width: 760px;
 	border: 1px solid #000000;
-	background-color: #CCCCCC;
+	background-color: #aaa;
 }

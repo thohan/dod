@@ -3,8 +3,10 @@
 	Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2 style="text-align: center;">banner, replace with images and such</h2>
-<div class="game-canvas">
+<h2 style="text-align: center;"></h2>
+<div class="game-canvas" style="position: relative;">
+	@* Looks like it's easy to put textboxes on top of a canvas! *@
+	<input type="text" style="width: 200px; position:absolute; top: 10px; z-index: 1000000;"/>
 	<div id="kContainer"></div>
 </div>
 <br />
