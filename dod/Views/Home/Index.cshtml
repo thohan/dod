@@ -6,7 +6,21 @@
 <h2 style="text-align: center;"></h2>
 <div class="game-canvas" style="position: relative;">
 	@* Looks like it's easy to put textboxes on top of a canvas! *@
-	<input type="text" style="width: 200px; position:absolute; top: 10px; z-index: 1000000;"/>
+	
+	<div id="divNewProfile" style="position: absolute; top: 218px; left: 460px; z-index: 1000000; display: none;">
+		<span style="color: #555; font: 18px arial;">Profile name:</span>
+		<br />
+		<input id="txtNewProfile" type="text" style="color: #555; font-size: 22px; height: 22px; width: 130px; border: 8px solid #444;" maxlength="8" />
+		<input id="btnNewProfile" type="button" value="OK!" />
+		<br />
+		<span id="spnErrorMsg" style="color: #f33; font: 18px arial; display: none;">This profile is already in use!</span>
+	</div>
+
+	<div id="divChooseProfile" style="position: absolute; top: 367px; left: 308px; z-index: 1000000;">
+		<span style="color: #555; font: 18px arial;">Choose profile:</span>
+		<div id="divProfilesToChoose"></div>
+	</div>
+	
 	<div id="kContainer"></div>
 </div>
 <br />

@@ -54,17 +54,17 @@
 			setStartButtonBehavior(startButton);
 			setContinueButtonBehavior(continueButton);
 
-			// TODO: Comment out all of the following this, it's a "privacy screen" for testing purposes
-			var topRect = new Kinetic.Rect({
-				width: 760,
-				height: 560,
-				fill: "#aaa",
-				visible: true
-			});
-			var topLayer = new Kinetic.Layer();
-			topLayer.add(topRect);
-			self.stage.add(topLayer);
-			// Bonus: textbox on top of the canvas:
+			//// TODO: Comment out all of the following this, it's a "privacy screen" for testing purposes
+			//var topRect = new Kinetic.Rect({
+			//	width: 760,
+			//	height: 560,
+			//	fill: "#aaa",
+			//	visible: true
+			//});
+			//var topLayer = new Kinetic.Layer();
+			//topLayer.add(topRect);
+			//self.stage.add(topLayer);
+			//// Bonus: textbox on top of the canvas:
 			
 		}
 
@@ -85,24 +85,42 @@
 					width: 150,
 					height: 40
 				});
+				
 				button.draw();
-				var backRect = new Kinetic.Rect({
-					width: 760,
-					height: 560,
-					fill: "#383870",
-					visible: false
-				});
-				var layer = new Kinetic.Layer();
-				layer.add(backRect);
-				self.stage.add(layer);
+				$("#divNewProfile").show();
+				
+				$("#btnNewProfile").click(function () {
+					if (self.profileHelper.profileNamesString().indexOf($("#txtNewProfile").val().toLowerCase()) !== -1) {
+						$("#spnErrorMsg").text("This profile is already in use!").show();
+						return;
+					}
 
-				self.transitions.zowie(function () {
-					backRect.setVisible(true);
-					// TODO: Something with a textbox/accept/cancel for creating a new profile.
-					layer.draw();
-				}, function () {
-					// This won't happen until a profile is created
-					drawStartCrawl(layer, backRect);
+					// Should be safe to save a profile here since presumably it's a new one and we're not overwriting anyone's profiles.
+					var msg = self.profileHelper.save($("#txtNewProfile").val(), self.profile);
+
+					if (msg && msg.length > 0) {
+						$("#spnErrorMsg").text(msg).show();
+					} else {
+						$("#divNewProfile").hide();
+						$("#spnErrorMsg").text("").hide();
+						var backRect = new Kinetic.Rect({
+							width: 760,
+							height: 560,
+							fill: "#383870",
+							visible: false
+						});
+						var layer = new Kinetic.Layer();
+						layer.add(backRect);
+						self.stage.add(layer);
+
+						self.transitions.zowie(self.stage, function () {
+							backRect.setVisible(true);
+							// TODO: post-start behavior
+							layer.draw();
+						}, function() {
+							drawStartCrawl(layer, backRect);
+						});
+					}
 				});
 			});
 		}
@@ -124,14 +142,23 @@
 					width: 150,
 					height: 40
 				});
+
 				button.draw();
-				self.transitions.tilesweep(function () {
-					for (var i = 0; i < self.profileNames.length; i++) {
-						// TODO: Use self.profileNames[i] to make buttons for profile choosing. Also, ensure there is no leading comma (this'll be done elsewhere);
+
+				if ($("#divProfilesToChoose input").length === 0) {
+					for (var i = 0; i < self.profileHelper.profileNames().length; i++) {
+						var profName = self.profileHelper.profileNames()[i];
+						$("#divProfilesToChoose").append("<input type='button' value='" + profName + "'/>");
 					}
-				}, function () {
-					// End-transition code here
-				});
+				}
+
+
+				// Use this code upon a press of a profile button!
+				//self.transitions.tilesweep(self.stage, function () {
+					
+				//}, function () {
+				//	// End-transition code here
+				//});
 			});
 		}
 
@@ -140,7 +167,7 @@
 			var continueButton = self.helper.drawImage(620, 760, "buttonSprites", 150, 40, layer, 0, 40, 150, 40);
 
 			continueButton.on("mouseup", function () {
-				self.transitions.zowie(function () {
+				self.transitions.zowie(self.stage, function () {
 					backRect.destroy();
 					continueButton.destroy();
 					crawlImage.destroy();
@@ -180,16 +207,16 @@
 
 		self.helper = new DrawHelper();
 
-		self.zowie = function (callback, callback2) {
+		self.zowie = function (stage, callback, callback2) {
 			var strokeWidth = 20;
 			var currentStroke = 0;
-			var canvasWidthCenter = self.stage.getWidth() / 2;
-			var canvasHeightCenter = self.stage.getHeight() / 2;
+			var canvasWidthCenter = stage.getWidth() / 2;
+			var canvasHeightCenter = stage.getHeight() / 2;
 			var counter = 0;
 			var goUp = true;
 			var rectArray = [];
 			var layer = new Kinetic.Layer();
-			self.stage.add(layer);
+			stage.add(layer);
 
 			var interval = setInterval(function () {
 				if (goUp === true) {
@@ -230,10 +257,10 @@
 			}, 75);
 		};
 
-		self.tilesweep = function (callback, callback2) {
+		self.tilesweep = function (stage, callback, callback2) {
 			var tsize = tileSize;
 			var layer = new Kinetic.Layer();
-			self.stage.add(layer);
+			stage.add(layer);
 			var counter = 0;
 			var goUp = true;
 			var i;
@@ -311,6 +338,14 @@
 		var self = this;
 		self.profileNamesKey = "leaf.profiles";
 
+		self.profileNamesString = function () {
+			if (localStorage[self.profileNamesKey]) {
+				return localStorage[self.profileNamesKey];
+			} else {
+				return "";
+			}
+		};
+
 		self.profileNames = function () {
 			if (localStorage[self.profileNamesKey]) {
 				return localStorage[self.profileNamesKey].split(",");
@@ -325,6 +360,8 @@
 		self.save = function (profileName, profile) {
 			if (profileName != null && profileName.length > 0) {
 				// I need to check against the list!
+				profileName = profileName.toLowerCase();
+
 				var profileList = localStorage[self.profileNamesKey];
 
 				if (typeof profileList == "undefined") {
@@ -332,25 +369,26 @@
 				}
 
 				if (profileList.length === 0) {
-					profileList = profileName.toLowerCase();
+					profileList = profileName;
 				} else {
 					var profileArray = profileList.split(",");
+					
 					if (profileArray.length > 5) {
-						alert("all profiles are used");
-						return;
+						return "profile list is full: " + profileList;
 					}
 					
 					if (profileList.indexOf(profileName) === -1) {
-						profileList += "," + profileName.toLowerCase();
+						profileList += "," + profileName;
 					}
 				}
 
 				localStorage[self.profileNamesKey] = profileList;
 				localStorage[self.profileNamesKey + "." + profileName] = JSON.stringify(profile);
-				// alert(localStorage[self.profileNamesKey + "." + profileName]);
 			} else {
-				alert("profileName is empty: ProfileHelper.save()");
+				return "profileName is empty: ProfileHelper.save()";
 			}
+
+			return "";
 		};
 
 		return self;
